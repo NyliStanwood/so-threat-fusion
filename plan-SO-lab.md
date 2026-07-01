@@ -116,6 +116,20 @@ The original Phase 1 (Gap Analysis) focuses on what SO *misses*. This phase broa
 #### What SO Does NOT Do (Gap Section)
 This is the original Phase 1 content — cross-source correlation absence, no ATT&CK stage inference, no confidence scoring, no STIX/TAXII native export. See [SecurityOnion-Overview.md](docs/SecurityOnion-Overview.md#what-security-onion-does-not-do).
 
+##### Gap Summary (Student Reading)
+
+Security Onion is a powerful platform, but students should understand what it does **not** do natively — these gaps are precisely where the TFM fusion layer adds value:
+
+| Gap | Why it matters |
+|---|---|
+| **No cross-source correlation** | A Zeek conn event and a Sysmon process event at the same time involving the same IP are stored separately; SO does not link them automatically. |
+| **No temporal attack chain reconstruction** | SO shows individual events but does not group them into "this sequence of events = stage 1 → stage 2 → stage 3 of an attack". |
+| **No ATT&CK stage tagging** | Alerts are rule-based; there is no automatic mapping of observed behaviour to MITRE ATT&CK tactics and techniques. |
+| **No structured threat intelligence export** | SO does not produce STIX 2.1 bundles or publish to a TAXII server. |
+
+These gaps are explored in Lab Exercise 4 (Cross-Source Correlation) and Lab Exercise 5 (Fusion Output).
+
+
 ### Deliverables for L1
 - [ ] SO Feature Survey document (~5 pages): one section per major component with screenshots, example log records, key ECS fields students will query
 - [ ] Gap analysis document (2–3 pages, originally Phase 1 deliverable) — now framed as "here's what SO gives you, and here's where it stops"
