@@ -16,14 +16,14 @@ Security Onion es una distribución de Linux de código abierto para la monitori
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  CAPA 4 — INGENIERÍA DE DETECCIÓN                        │
+│  CAPA 4 — INGENIERÍA DE DETECCIÓN                       │
 │  Detections · ATT&CK Navigator · CyberChef · Kibana     │
 ├─────────────────────────────────────────────────────────┤
-│  CAPA 3 — INTERFAZ WEB SOC                               │
+│  CAPA 3 — INTERFAZ WEB SOC                              │
 │  Alerts · Hunt · Dashboards · Cases · PCAP · Onion AI   │
 ├───────────────────────┬─────────────────────────────────┤
 │  CAPA 1               │  CAPA 2                         │
-│  VISIBILIDAD DE RED   │  VISIBILIDAD DE HOST             │
+│  VISIBILIDAD DE RED   │  VISIBILIDAD DE HOST            │
 │  Zeek · Suricata      │  Elastic Agent · Sysmon         │
 │  Logstash · ES        │  Osquery · Elastic Fleet        │
 └───────────────────────┴─────────────────────────────────┘
@@ -602,17 +602,3 @@ Todos los eventos de todas las fuentes terminan en Elasticsearch normalizados a 
 | `registry.path` | keyword | Sysmon 13 | `HKLM\Software\Microsoft\…` |
 
 ---
-
-# Apéndice B — Resumen de Carencias (Lectura para Estudiantes)
-
-Security Onion es una plataforma potente. Entender sus limitaciones es tan importante como entender sus capacidades — estas carencias definen dónde las herramientas adicionales (incluyendo la capa de fusión del TFM) aportan valor.
-
-| Carencia | Detalle |
-|---|---|
-| **Sin correlación entre fuentes** | Un evento `conn` de Zeek y un evento de proceso de Sysmon que involucran la misma IP al mismo tiempo se almacenan como registros independientes. SO no los enlaza automáticamente. |
-| **Sin reconstrucción temporal de la cadena de ataque** | SO muestra eventos individuales de forma cronológica pero no los agrupa en "esta secuencia = etapa 1 → etapa 2 → etapa 3 de un ataque." |
-| **Sin etiquetado de etapas ATT&CK** | Las reglas de Suricata pueden referenciar ATT&CK en sus metadatos, pero no existe un mapeo automático de un clúster de eventos correlacionado a una secuencia completa de tácticas ATT&CK. |
-| **Sin exportación estructurada de inteligencia de amenazas** | SO no produce paquetes STIX 2.1 ni publica inteligencia en un servidor TAXII. |
-| **Enriquecimiento LLM de un solo evento** | Onion AI enriquece una alerta a la vez. No existe un mecanismo para fusionar eventos relacionados en un clúster y enriquecer el clúster como un todo. |
-
-Estas carencias son el punto de partida del Ejercicio de Laboratorio 4 (Correlación Multi-Fuente) y del Ejercicio de Laboratorio 5 (Salida de la Fusión), y constituyen la motivación central de la arquitectura del TFM.
