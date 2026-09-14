@@ -116,82 +116,10 @@ SO uses **ECS (Elastic Common Schema)** for normalization. Key fields to know:
 
 ---
 
-## Querying Elasticsearch from Python
-
-Elasticsearch is locked down by default. Access uses the same credentials as the SOC web UI.
-
-### Authentication options
-- **Username/password** (basic auth) over HTTPS, port 9200
-- Certificate CA is at `/etc/ssl/certs/intca.crt` on the SO node (copy it out for trusted connections)
-
-### Python example (`elasticsearch-py`)
-```python
-from elasticsearch import Elasticsearch
-
-es = Elasticsearch(
-    "https://<SO_HOST>:9200",
-    basic_auth=("elastic", "<PASSWORD>"),
-    ca_certs="/path/to/intca.crt",   # or verify_certs=False for lab use
-)
-
-# Cross-index query: Zeek + Suricata events in the last 15 minutes
-resp = es.search(
-    index="logs-zeek-so,logs-suricata-so",
-    body={
-        "query": {
-            "range": {"@timestamp": {"gte": "now-15m"}}
-        },
-        "_source": ["@timestamp", "source.ip", "destination.ip", "event.category", "rule.name"],
-        "size": 500
-    }
-)
-```
-
-### Useful shell tool (on the SO node itself)
-```bash
-sudo so-elasticsearch-query logs-zeek-so/_search \
-  -d '{"query": {"match_all": {}}, "size": 1}' | jq
-```
-
----
-
-## Gotchas
-
-### Firewall is Salt-managed — do not touch iptables manually
-SO manages iptables via Salt. Any manual `iptables` change will be overwritten on the next Salt run. All firewall changes must go through:
-**SOC → Administration → Configuration → firewall → hostgroups**
-
-If you lock yourself out, you have to use the physical console or a direct management interface. Add your analysis machine's IP to the allowed hosts before you start querying ES remotely.
-
-### Elasticsearch heap and OOM crashes
-Default heap = 25% of RAM, capped at 25 GB. On an 8 GB machine that's 2 GB — Elasticsearch will crash under load. On a 16 GB standalone node, ES gets 4 GB heap by default. This is borderline.
-
-- Rule of thumb: heap × 2 should not exceed total RAM minus 4 GB for OS
-- Never exceed 31 GB heap (JVM performance cliff above compressed OOP boundary)
-- If ES keeps crashing: increase RAM or reduce retention/index count
-
-### Never manually edit Logstash or ES configs directly
-All configuration is managed by Salt and lives under `/opt/so/saltstack/`. Direct edits to `/etc/logstash/` or ES config files will be overwritten. Use the SOC UI or edit Salt pillar files.
-
-### Sysmon data requires a Windows endpoint
-Zeek and Suricata run on the SO sensor and generate data automatically. Sysmon data only appears if you have a Windows host with Elastic Agent + Sysmon installed and pointed at the SO fleet server. If your lab is Linux-only, you will not see `logs-sysmon-so` events.
-
-### Data volume grows fast
-Even in a lab, full PCAP + Zeek + Suricata generates gigabytes per hour depending on traffic. Set retention policies early. By default, SO manages index lifecycle (ILM) automatically but storage can fill quickly during attack simulations.
-
-### Salt auth change after 7 days (v2.4.210+)
-Security Onion 2.4.210 introduced a Salt authentication update. After initial install, the system sets `minimum_auth_version: 0` for compatibility. After 7 days, it automatically bumps to version 3. If you have any older minions or custom Salt configurations, they will stop communicating. Not relevant for a single standalone node, but worth knowing.
-
-### Suricata custom rulesets pause syncing (v2.4.200+)
-If you add a custom Suricata ruleset, it will pause all detection syncing until you explicitly review the "Sync Block" in the UI. Your new rules won't load silently — check the detections page.
-
----
-
 ## What Security Onion Does Not Do
 
-This is the research justification for the fusion layer.
 
-| Gap | Why it matters for this project |
+| Gap | Description |
 |---|---|
 | **No cross-source event correlation** | Zeek, Suricata, and Sysmon alerts are siloed — SO has no engine to link a Zeek conn log, a Suricata alert, and a Sysmon process event that all involve the same attacker IP | 
 | **No kill-chain or ATT&CK stage inference** | Individual alerts are not grouped into attack narratives; an analyst must do this manually |
@@ -202,5 +130,3 @@ This is the research justification for the fusion layer.
 | **Basic case management** | TheHive integration exists but is not SOAR-level automation; no playbook-driven response |
 
 ---
-
-
