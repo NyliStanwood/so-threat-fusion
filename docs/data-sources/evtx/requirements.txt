@@ -1,0 +1,5 @@
+# evtx parsing (Rust-backed EVTX -> JSON parser, matches docs/data-sources/1.EVTX-ATTACK-SAMPLES.md Path 1)
+evtx>=0.8.0
+
+# Security Onion 2.4 ships Elastic stack 8.x - pin the client to match
+elasticsearch>=8.0.0,<9.0.0
