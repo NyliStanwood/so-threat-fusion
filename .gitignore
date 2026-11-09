@@ -66,3 +66,14 @@ securityonion-2.4.211-20260407.iso.sig
 prev.txt
 docs/~$-install-steps.docx
 docs/SO-install-steps-upd.docx
+.claude/settings.local.json
+docs/install/SO+kali-install-NAT Network.pdf
+docs/install/~$+kali-install-NAT Network.docx
+
+# SSH keys: never commit (private key gives access to the UPM server)
+marylin_ssh
+marylin_ssh.pub
+id_rsa*
+id_ed25519*
+*.pem
+.claude/settings.local.json
